@@ -1,7 +1,11 @@
 package android.exercise.mini.interactions;
 
+import android.accessibilityservice.AccessibilityService;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -20,6 +24,7 @@ public class EditTitleActivity extends AppCompatActivity {
   // `private boolean isEditing = false;`
   // in onCreate() set `this.isEditing` to `true` once the user starts editing, set to `false` once done editing
   // in onBackPressed() check `if(this.isEditing)` to understand what to do
+  private boolean isEditing = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,15 @@ public class EditTitleActivity extends AppCompatActivity {
 
       to complete (1.) & (2.), start by just changing visibility. only add animations after everything else is ready
        */
+      this.isEditing = true;
+
+      fabStartEdit.animate().alpha(0f).rotation(-180).start();
+      fabStartEdit.setVisibility(View.INVISIBLE);
+      fabEditDone.setVisibility(View.VISIBLE);
+      fabEditDone.animate().alpha(1f).rotation(360).start();
+      textViewTitle.setVisibility(View.INVISIBLE);
+      editTextTitle.setVisibility(View.VISIBLE);
+      editTextTitle.setText(textViewTitle.getText());
     });
 
     // handle clicks on "done edit"
@@ -69,11 +83,28 @@ public class EditTitleActivity extends AppCompatActivity {
 
       to complete (1.) & (2.), start by just changing visibility. only add animations after everything else is ready
        */
+      this.isEditing = false;
+
+      fabEditDone.animate().alpha(0f).rotation(-180).start();
+      fabEditDone.setVisibility(View.INVISIBLE);
+      fabStartEdit.setVisibility(View.VISIBLE);
+      fabStartEdit.animate().alpha(1f).rotation(360).start();
+      textViewTitle.setText(editTextTitle.getText());
+      textViewTitle.setVisibility(View.VISIBLE);
+      editTextTitle.setVisibility(View.INVISIBLE);
+      ((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
     });
   }
 
   @Override
   public void onBackPressed() {
+    setContentView(R.layout.activity_edit_title);
+
+    // find all views
+    FloatingActionButton fabStartEdit = findViewById(R.id.fab_start_edit);
+    FloatingActionButton fabEditDone = findViewById(R.id.fab_edit_done);
+    TextView textViewTitle = findViewById(R.id.textViewPageTitle);
+    EditText editTextTitle = findViewById(R.id.editTextPageTitle);
     // BACK button was clicked
     /*
     TODO:
@@ -90,5 +121,18 @@ public class EditTitleActivity extends AppCompatActivity {
     to work with views, you will need to find them first.
     to find views call `findViewById()` in a same way like in `onCreate()`
      */
+  if (this.isEditing){
+    editTextTitle.setText(textViewTitle.getText());
+    editTextTitle.setVisibility(View.INVISIBLE);
+    textViewTitle.setVisibility(View.VISIBLE);
+    fabEditDone.animate().alpha(0f).rotation(-180).start();
+    fabEditDone.setVisibility(View.INVISIBLE);
+    fabStartEdit.setVisibility(View.VISIBLE);
+    fabStartEdit.animate().alpha(1f).rotation(360).start();
+    this.isEditing = false;
+  }
+  else{
+    super.onBackPressed();
+  }
   }
 }
